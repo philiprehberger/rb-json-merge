@@ -2,8 +2,7 @@
 
 [![Tests](https://github.com/philiprehberger/rb-json-merge/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-json-merge/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/philiprehberger-json_merge.svg)](https://rubygems.org/gems/philiprehberger-json_merge)
-[![License](https://img.shields.io/github/license/philiprehberger/rb-json-merge)](LICENSE)
-[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/rb-json-merge)](https://github.com/philiprehberger/rb-json-merge/commits/main)
 
 JSON Merge Patch (RFC 7396) and JSON Patch (RFC 6902) for Ruby
 
@@ -97,6 +96,24 @@ bundle install
 bundle exec rspec      # Run tests
 bundle exec rubocop    # Check code style
 ```
+
+## Support
+
+If you find this project useful:
+
+⭐ [Star the repo](https://github.com/philiprehberger/rb-json-merge)
+
+🐛 [Report issues](https://github.com/philiprehberger/rb-json-merge/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+
+💡 [Suggest features](https://github.com/philiprehberger/rb-json-merge/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+
+❤️ [Sponsor development](https://github.com/sponsors/philiprehberger)
+
+🌐 [All Open Source Projects](https://philiprehberger.com/open-source-packages)
+
+💻 [GitHub Profile](https://github.com/philiprehberger)
+
+🔗 [LinkedIn Profile](https://www.linkedin.com/in/philiprehberger)
 
 ## License
 
