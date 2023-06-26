@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ['me@philiprehberger.com']
   spec.summary = 'JSON Merge Patch (RFC 7396) and JSON Patch (RFC 6902) for Ruby'
   spec.description = 'Apply and generate JSON patches using RFC 7396 Merge Patch and RFC 6902 JSON Patch. ' \
-                       'Supports add, remove, replace, move, copy, and test operations.'
+                     'Supports add, remove, replace, move, copy, and test operations.'
   spec.homepage = 'https://philiprehberger.com/open-source-packages/ruby/philiprehberger-json_merge'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 3.1.0'
