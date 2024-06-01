@@ -381,4 +381,94 @@ RSpec.describe Philiprehberger::JsonMerge do
       expect(described_class.merge_patch(source, patch)).to eq(target)
     end
   end
+
+  describe '.validate' do
+    it 'returns valid for correct operations' do
+      target = { 'name' => 'Alice' }
+      ops = [{ 'op' => 'replace', 'path' => '/name', 'value' => 'Bob' }]
+      result = described_class.validate(target, ops)
+      expect(result[:valid]).to be true
+      expect(result[:errors]).to be_empty
+    end
+
+    it 'returns errors for invalid operations' do
+      target = { 'name' => 'Alice' }
+      ops = [{ 'op' => 'remove', 'path' => '/nonexistent' }]
+      result = described_class.validate(target, ops)
+      expect(result[:valid]).to be false
+      expect(result[:errors].length).to eq(1)
+    end
+
+    it 'does not modify the target' do
+      target = { 'name' => 'Alice' }
+      ops = [{ 'op' => 'replace', 'path' => '/name', 'value' => 'Bob' }]
+      described_class.validate(target, ops)
+      expect(target['name']).to eq('Alice')
+    end
+  end
+
+  describe '.invert' do
+    it 'generates reverse operations for add' do
+      target = { 'name' => 'Alice' }
+      ops = [{ 'op' => 'add', 'path' => '/age', 'value' => 30 }]
+      inverse = described_class.invert(target, ops)
+      expect(inverse.length).to eq(1)
+      expect(inverse[0]['op']).to eq('remove')
+    end
+
+    it 'generates reverse operations for remove' do
+      target = { 'name' => 'Alice', 'age' => 30 }
+      ops = [{ 'op' => 'remove', 'path' => '/age' }]
+      inverse = described_class.invert(target, ops)
+      expect(inverse[0]['op']).to eq('add')
+      expect(inverse[0]['value']).to eq(30)
+    end
+
+    it 'generates reverse operations for replace' do
+      target = { 'name' => 'Alice' }
+      ops = [{ 'op' => 'replace', 'path' => '/name', 'value' => 'Bob' }]
+      inverse = described_class.invert(target, ops)
+      expect(inverse[0]['op']).to eq('replace')
+      expect(inverse[0]['value']).to eq('Alice')
+    end
+
+    it 'can undo a patch via apply' do
+      target = { 'name' => 'Alice', 'age' => 30 }
+      ops = [{ 'op' => 'replace', 'path' => '/name', 'value' => 'Bob' }]
+      patched = described_class.apply(target, ops)
+      inverse = described_class.invert(target, ops)
+      restored = described_class.apply(patched, inverse)
+      expect(restored).to eq(target)
+    end
+  end
+
+  describe '.compact' do
+    it 'removes redundant operations on the same path' do
+      ops = [
+        { 'op' => 'add', 'path' => '/name', 'value' => 'Alice' },
+        { 'op' => 'replace', 'path' => '/name', 'value' => 'Bob' }
+      ]
+      result = described_class.compact(ops)
+      expect(result.length).to eq(1)
+      expect(result[0]['value']).to eq('Bob')
+    end
+
+    it 'removes add followed by remove on same path' do
+      ops = [
+        { 'op' => 'add', 'path' => '/temp', 'value' => 'x' },
+        { 'op' => 'remove', 'path' => '/temp' }
+      ]
+      result = described_class.compact(ops)
+      expect(result).to be_empty
+    end
+
+    it 'preserves operations on different paths' do
+      ops = [
+        { 'op' => 'add', 'path' => '/a', 'value' => 1 },
+        { 'op' => 'add', 'path' => '/b', 'value' => 2 }
+      ]
+      result = described_class.compact(ops)
+      expect(result.length).to eq(2)
+    end
+  end
 end

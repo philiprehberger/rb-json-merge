@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-01
+
+### Added
+- `JsonMerge.validate(target, ops)` for dry-run patch validation
+- `JsonMerge.invert(target, ops)` for generating reverse operations
+- `JsonMerge.compact(ops)` for removing redundant operations
+
 ## [0.1.3] - 2026-03-31
 
 ### Added

@@ -80,6 +80,34 @@ Philiprehberger::JsonMerge.merge_diff(source, target)
 # => {"b"=>3, "c"=>4}
 ```
 
+### Validate
+
+Dry-run patch operations without modifying the document:
+
+```ruby
+result = Philiprehberger::JsonMerge.validate(target, operations)
+result[:valid]   # => true/false
+result[:errors]  # => ["Operation 0 (remove /missing): ..."]
+```
+
+### Invert
+
+Generate reverse operations to undo a patch:
+
+```ruby
+inverse = Philiprehberger::JsonMerge.invert(target, operations)
+restored = Philiprehberger::JsonMerge.apply(patched, inverse)
+restored == target  # => true
+```
+
+### Compact
+
+Remove redundant operations:
+
+```ruby
+optimized = Philiprehberger::JsonMerge.compact(operations)
+```
+
 ## API
 
 | Method | Description |
@@ -88,6 +116,9 @@ Philiprehberger::JsonMerge.merge_diff(source, target)
 | `JsonMerge.apply(target, operations)` | Apply RFC 6902 JSON Patch |
 | `JsonMerge.diff(source, target)` | Generate RFC 6902 patch operations |
 | `JsonMerge.merge_diff(source, target)` | Generate RFC 7396 merge patch |
+| `JsonMerge.validate(target, ops)` | Dry-run operations, return `{ valid:, errors: }` |
+| `JsonMerge.invert(target, ops)` | Generate reverse operations to undo a patch |
+| `JsonMerge.compact(ops)` | Remove redundant operations |
 
 ## Development
 
