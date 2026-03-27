@@ -3,7 +3,7 @@
 [![Tests](https://github.com/philiprehberger/rb-json-merge/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-json-merge/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/philiprehberger-json_merge.svg)](https://rubygems.org/gems/philiprehberger-json_merge)
 [![License](https://img.shields.io/github/license/philiprehberger/rb-json-merge)](LICENSE)
-[![Sponsor](https://img.shields.io/badge/sponsor-philiprehberger-ea4aaa)](https://github.com/sponsors/philiprehberger)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 JSON Merge Patch (RFC 7396) and JSON Patch (RFC 6902) for Ruby
 
@@ -100,4 +100,4 @@ bundle exec rubocop    # Check code style
 
 ## License
 
-MIT
+[MIT](LICENSE)
