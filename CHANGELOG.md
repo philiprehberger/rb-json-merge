@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-17
+
+### Added
+- `JsonMerge.paths(operations)` returns the sorted, deduplicated list of paths a JSON Patch sequence would touch (includes `from` for move/copy)
+
 ## [0.2.0] - 2026-04-01
 
 ### Added

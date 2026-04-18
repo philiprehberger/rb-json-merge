@@ -442,6 +442,63 @@ RSpec.describe Philiprehberger::JsonMerge do
     end
   end
 
+  describe '.paths' do
+    it 'returns [] for empty operations' do
+      expect(described_class.paths([])).to eq([])
+    end
+
+    it 'returns the path for a single replace op' do
+      ops = [{ 'op' => 'replace', 'path' => '/a/b', 'value' => 1 }]
+      expect(described_class.paths(ops)).to eq(['/a/b'])
+    end
+
+    it 'includes both from and path for a move op' do
+      ops = [{ 'op' => 'move', 'from' => '/src', 'path' => '/dst' }]
+      expect(described_class.paths(ops)).to eq(['/dst', '/src'])
+    end
+
+    it 'includes both from and path for a copy op' do
+      ops = [{ 'op' => 'copy', 'from' => '/src', 'path' => '/dst' }]
+      expect(described_class.paths(ops)).to eq(['/dst', '/src'])
+    end
+
+    it 'deduplicates duplicate paths across multiple ops' do
+      ops = [
+        { 'op' => 'add', 'path' => '/a', 'value' => 1 },
+        { 'op' => 'replace', 'path' => '/a', 'value' => 2 },
+        { 'op' => 'add', 'path' => '/b', 'value' => 3 }
+      ]
+      expect(described_class.paths(ops)).to eq(['/a', '/b'])
+    end
+
+    it 'returns the result sorted ascending' do
+      ops = [
+        { 'op' => 'add', 'path' => '/z', 'value' => 1 },
+        { 'op' => 'add', 'path' => '/a', 'value' => 2 },
+        { 'op' => 'add', 'path' => '/m', 'value' => 3 }
+      ]
+      expect(described_class.paths(ops)).to eq(['/a', '/m', '/z'])
+    end
+
+    it 'does not mutate the input array' do
+      ops = [
+        { 'op' => 'move', 'from' => '/src', 'path' => '/dst' },
+        { 'op' => 'add', 'path' => '/a', 'value' => 1 }
+      ]
+      snapshot = Marshal.load(Marshal.dump(ops))
+      described_class.paths(ops)
+      expect(ops).to eq(snapshot)
+    end
+
+    it 'silently skips ops without a path' do
+      ops = [
+        { 'op' => 'add', 'path' => '/a', 'value' => 1 },
+        { 'op' => 'replace', 'value' => 2 }
+      ]
+      expect(described_class.paths(ops)).to eq(['/a'])
+    end
+  end
+
   describe '.compact' do
     it 'removes redundant operations on the same path' do
       ops = [
