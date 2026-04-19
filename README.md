@@ -108,6 +108,21 @@ Remove redundant operations:
 optimized = Philiprehberger::JsonMerge.compact(operations)
 ```
 
+### Paths affected by a patch
+
+Get the sorted, deduplicated list of document paths that a patch sequence would touch. For `move` and `copy` ops the `from` location is included alongside `path`:
+
+```ruby
+ops = [
+  { "op" => "replace", "path" => "/name", "value" => "Bob" },
+  { "op" => "move",    "from" => "/age", "path" => "/years" },
+  { "op" => "add",     "path" => "/name", "value" => "Bob" }
+]
+
+Philiprehberger::JsonMerge.paths(ops)
+# => ["/age", "/name", "/years"]
+```
+
 ## API
 
 | Method | Description |
@@ -119,6 +134,7 @@ optimized = Philiprehberger::JsonMerge.compact(operations)
 | `JsonMerge.validate(target, ops)` | Dry-run operations, return `{ valid:, errors: }` |
 | `JsonMerge.invert(target, ops)` | Generate reverse operations to undo a patch |
 | `JsonMerge.compact(ops)` | Remove redundant operations |
+| `JsonMerge.paths(ops)` | List sorted, deduplicated paths a patch touches (includes `from` for move/copy) |
 
 ## Development
 

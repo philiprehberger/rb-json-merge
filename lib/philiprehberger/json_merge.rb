@@ -76,6 +76,28 @@ module Philiprehberger
       inverse
     end
 
+    # List the distinct document paths touched by a patch sequence
+    #
+    # Collects the `path` from every operation. For `move` and `copy`
+    # operations the `from` pointer is also included. Operations that are
+    # missing a `path` (or `from` where applicable) are skipped silently;
+    # this method does not validate op shape.
+    #
+    # @param operations [Array<Hash>] RFC 6902 patch operations
+    # @return [Array<String>] sorted, deduplicated list of paths
+    def self.paths(operations)
+      result = []
+      operations.each do |op|
+        path = op['path'] || op[:path]
+        result << path if path
+        if %w[move copy].include?(op['op'] || op[:op])
+          from = op['from'] || op[:from]
+          result << from if from
+        end
+      end
+      result.uniq.sort
+    end
+
     # Remove redundant operations from a patch
     #
     # @param operations [Array<Hash>] RFC 6902 patch operations
