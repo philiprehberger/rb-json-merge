@@ -98,6 +98,99 @@ module Philiprehberger
       result.uniq.sort
     end
 
+    # Read a value from a document via RFC 6901 JSON Pointer.
+    #
+    # @param doc [Hash, Array] the document to read from
+    # @param path [String] JSON Pointer (e.g. `"/a/b/0"`); empty string returns the whole document
+    # @param default [Object] value to return when the path does not resolve (default: `nil`)
+    # @return [Object] the value at the path, or `default` when missing
+    def self.read(doc, path, default: nil)
+      tokens = parse_pointer(path)
+      tokens.reduce(doc) do |obj, token|
+        case obj
+        when Hash
+          return default unless obj.key?(token)
+
+          obj[token]
+        when Array
+          return default unless token.match?(/\A\d+\z/)
+
+          idx = token.to_i
+          return default if idx >= obj.length
+
+          obj[idx]
+        else
+          return default
+        end
+      end
+    end
+
+    # Write a value into a document at an RFC 6901 JSON Pointer.
+    #
+    # Intermediate hash containers are created as needed; the supplied
+    # document is mutated and returned. Use `deep_clone` first if you need
+    # to preserve the original.
+    #
+    # @param doc [Hash, Array] the document to write into
+    # @param path [String] JSON Pointer (e.g. `"/a/b"`); empty string replaces the whole document
+    # @param value [Object] the value to write
+    # @return [Hash, Array] the mutated document
+    # @raise [Error] if a pointer segment cannot be traversed
+    def self.write(doc, path, value)
+      tokens = parse_pointer(path)
+      return value if tokens.empty?
+
+      parent = tokens[0..-2].each_with_index.reduce(doc) do |obj, (token, _)|
+        descend_for_write(obj, token)
+      end
+
+      last = tokens.last
+      case parent
+      when Hash
+        parent[last] = value
+      when Array
+        raise Error, "Invalid array index: '#{last}'" unless last.match?(/\A\d+\z|\A-\z/)
+
+        last == '-' ? parent.push(value) : parent[last.to_i] = value
+      else
+        raise Error, "Cannot write into #{parent.class}"
+      end
+
+      doc
+    end
+
+    def self.parse_pointer(path)
+      return [] if path == ''
+      raise Error, "Invalid JSON Pointer: '#{path}'" unless path.start_with?('/')
+
+      path[1..].split('/', -1).map { |t| t.gsub('~1', '/').gsub('~0', '~') }
+    end
+    private_class_method :parse_pointer
+
+    def self.descend_for_write(obj, token)
+      case obj
+      when Hash
+        if obj.key?(token)
+          child = obj[token]
+          raise Error, "Cannot descend into #{child.class} at '#{token}'" unless child.is_a?(Hash) || child.is_a?(Array)
+
+          child
+        else
+          obj[token] = {}
+        end
+      when Array
+        raise Error, "Invalid array index: '#{token}'" unless token.match?(/\A\d+\z/)
+
+        idx = token.to_i
+        raise Error, "Index #{idx} out of bounds" if idx >= obj.length
+
+        obj[idx]
+      else
+        raise Error, "Cannot traverse into #{obj.class}"
+      end
+    end
+    private_class_method :descend_for_write
+
     # Remove redundant operations from a patch
     #
     # @param operations [Array<Hash>] RFC 6902 patch operations

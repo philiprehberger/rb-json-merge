@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-30
+
+### Added
+- `JsonMerge.read(doc, path, default:)` — read a value from a document via RFC 6901 JSON Pointer; returns `default` when the path is missing
+- `JsonMerge.write(doc, path, value)` — write a value at an RFC 6901 JSON Pointer, creating intermediate hashes as needed; supports the `-` array-append token
+
+### Changed
+- README Development section trimmed to match the standard template (removed inline `# Run tests` / `# Check code style` comments)
+
 ## [0.3.0] - 2026-04-17
 
 ### Added

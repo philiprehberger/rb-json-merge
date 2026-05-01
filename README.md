@@ -123,6 +123,23 @@ Philiprehberger::JsonMerge.paths(ops)
 # => ["/age", "/name", "/years"]
 ```
 
+### JSON Pointer Read & Write
+
+```ruby
+doc = { "user" => { "profile" => { "email" => "a@b.com" } } }
+
+Philiprehberger::JsonMerge.read(doc, "/user/profile/email")            # => "a@b.com"
+Philiprehberger::JsonMerge.read(doc, "/user/missing", default: :gone)  # => :gone
+
+Philiprehberger::JsonMerge.write(doc, "/user/role", "admin")
+# doc now: { "user" => { "profile" => {...}, "role" => "admin" } }
+
+# Append to an array
+items = { "list" => ["a"] }
+Philiprehberger::JsonMerge.write(items, "/list/-", "b")
+# items["list"] => ["a", "b"]
+```
+
 ## API
 
 | Method | Description |
@@ -135,13 +152,15 @@ Philiprehberger::JsonMerge.paths(ops)
 | `JsonMerge.invert(target, ops)` | Generate reverse operations to undo a patch |
 | `JsonMerge.compact(ops)` | Remove redundant operations |
 | `JsonMerge.paths(ops)` | List sorted, deduplicated paths a patch touches (includes `from` for move/copy) |
+| `JsonMerge.read(doc, path, default:)` | Read a value via RFC 6901 JSON Pointer; returns `default` when missing |
+| `JsonMerge.write(doc, path, value)` | Write a value at an RFC 6901 JSON Pointer; creates intermediate hashes as needed |
 
 ## Development
 
 ```bash
 bundle install
-bundle exec rspec      # Run tests
-bundle exec rubocop    # Check code style
+bundle exec rspec
+bundle exec rubocop
 ```
 
 ## Support

@@ -528,4 +528,78 @@ RSpec.describe Philiprehberger::JsonMerge do
       expect(result.length).to eq(2)
     end
   end
+
+  describe '.read' do
+    it 'reads a top-level key via JSON Pointer' do
+      doc = { 'name' => 'Alice', 'role' => 'admin' }
+      expect(described_class.read(doc, '/name')).to eq('Alice')
+    end
+
+    it 'reads nested keys' do
+      doc = { 'user' => { 'profile' => { 'email' => 'a@b.com' } } }
+      expect(described_class.read(doc, '/user/profile/email')).to eq('a@b.com')
+    end
+
+    it 'reads array elements by index' do
+      doc = { 'items' => %w[a b c] }
+      expect(described_class.read(doc, '/items/1')).to eq('b')
+    end
+
+    it 'returns the whole document for empty pointer' do
+      doc = { 'a' => 1 }
+      expect(described_class.read(doc, '')).to eq(doc)
+    end
+
+    it 'returns the default when path is missing' do
+      expect(described_class.read({ 'a' => 1 }, '/missing', default: :gone)).to eq(:gone)
+    end
+
+    it 'unescapes ~0 and ~1 in tokens' do
+      doc = { 'a/b' => 1, 'c~d' => 2 }
+      expect(described_class.read(doc, '/a~1b')).to eq(1)
+      expect(described_class.read(doc, '/c~0d')).to eq(2)
+    end
+  end
+
+  describe '.write' do
+    it 'writes a top-level key' do
+      doc = { 'name' => 'Alice' }
+      described_class.write(doc, '/role', 'admin')
+      expect(doc).to eq('name' => 'Alice', 'role' => 'admin')
+    end
+
+    it 'creates intermediate hashes when missing' do
+      doc = {}
+      described_class.write(doc, '/a/b/c', 42)
+      expect(doc).to eq('a' => { 'b' => { 'c' => 42 } })
+    end
+
+    it 'overwrites a leaf value' do
+      doc = { 'a' => 1 }
+      described_class.write(doc, '/a', 99)
+      expect(doc).to eq('a' => 99)
+    end
+
+    it 'replaces the whole document for empty pointer' do
+      result = described_class.write({ 'a' => 1 }, '', { 'b' => 2 })
+      expect(result).to eq('b' => 2)
+    end
+
+    it 'writes into an array index' do
+      doc = { 'items' => %w[a b c] }
+      described_class.write(doc, '/items/1', 'B')
+      expect(doc['items']).to eq(%w[a B c])
+    end
+
+    it 'appends to an array with the - token' do
+      doc = { 'items' => %w[a b] }
+      described_class.write(doc, '/items/-', 'c')
+      expect(doc['items']).to eq(%w[a b c])
+    end
+
+    it 'raises when descending into a non-container' do
+      doc = { 'a' => 1 }
+      expect { described_class.write(doc, '/a/b', 2) }.to raise_error(Philiprehberger::JsonMerge::Error)
+    end
+  end
 end
