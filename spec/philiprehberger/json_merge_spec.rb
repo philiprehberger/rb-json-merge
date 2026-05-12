@@ -602,4 +602,66 @@ RSpec.describe Philiprehberger::JsonMerge do
       expect { described_class.write(doc, '/a/b', 2) }.to raise_error(Philiprehberger::JsonMerge::Error)
     end
   end
+
+  describe '.delete' do
+    it 'removes a top-level hash key and returns the value' do
+      doc = { 'name' => 'Alice', 'role' => 'admin' }
+      expect(described_class.delete(doc, '/role')).to eq('admin')
+      expect(doc).to eq('name' => 'Alice')
+    end
+
+    it 'removes a nested hash key and returns the value' do
+      doc = { 'user' => { 'name' => 'Alice', 'age' => 30 } }
+      expect(described_class.delete(doc, '/user/name')).to eq('Alice')
+      expect(doc).to eq('user' => { 'age' => 30 })
+    end
+
+    it 'removes an array element and shrinks the array' do
+      doc = { 'items' => %w[a b c] }
+      expect(described_class.delete(doc, '/items/1')).to eq('b')
+      expect(doc['items']).to eq(%w[a c])
+    end
+
+    it 'returns nil and does not mutate when the path is missing' do
+      doc = { 'a' => 1 }
+      expect(described_class.delete(doc, '/missing')).to be_nil
+      expect(doc).to eq('a' => 1)
+    end
+
+    it 'returns nil and does not mutate when an intermediate segment is missing' do
+      doc = { 'a' => 1 }
+      expect(described_class.delete(doc, '/b/c')).to be_nil
+      expect(doc).to eq('a' => 1)
+    end
+
+    it 'returns nil for the empty pointer and does not mutate the doc' do
+      doc = { 'a' => 1 }
+      expect(described_class.delete(doc, '')).to be_nil
+      expect(doc).to eq('a' => 1)
+    end
+
+    it 'returns nil for an invalid array index' do
+      doc = { 'items' => %w[a b c] }
+      expect(described_class.delete(doc, '/items/foo')).to be_nil
+      expect(doc['items']).to eq(%w[a b c])
+    end
+
+    it 'returns nil for an out-of-range array index' do
+      doc = { 'items' => %w[a b c] }
+      expect(described_class.delete(doc, '/items/9')).to be_nil
+      expect(doc['items']).to eq(%w[a b c])
+    end
+
+    it 'unescapes ~1 to remove keys containing /' do
+      doc = { 'a/b' => 1, 'c' => 2 }
+      expect(described_class.delete(doc, '/a~1b')).to eq(1)
+      expect(doc).to eq('c' => 2)
+    end
+
+    it 'unescapes ~0 to remove keys containing ~' do
+      doc = { 'a~b' => 1, 'c' => 2 }
+      expect(described_class.delete(doc, '/a~0b')).to eq(1)
+      expect(doc).to eq('c' => 2)
+    end
+  end
 end

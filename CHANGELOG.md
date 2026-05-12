@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-12
+
+### Added
+- `JsonMerge.delete(doc, path)` removes the value at an RFC 6901 JSON Pointer and returns the removed value; returns `nil` (and does not mutate) when the path is missing
+
 ## [0.4.0] - 2026-04-30
 
 ### Added

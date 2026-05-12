@@ -159,6 +159,55 @@ module Philiprehberger
       doc
     end
 
+    # Remove the value at an RFC 6901 JSON Pointer.
+    #
+    # Walks to the parent container, deletes the entry at the final segment,
+    # and returns the removed value. The supplied document is mutated in
+    # place (consistent with `write`). When the path is missing, the document
+    # is not modified and `nil` is returned. The empty pointer `""` is a
+    # no-op (the root cannot be removed) and returns `nil`.
+    #
+    # @param doc [Hash, Array] the document to remove from
+    # @param path [String] JSON Pointer (e.g. `"/a/b/0"`)
+    # @return [Object, nil] the removed value, or `nil` when the path is missing
+    def self.delete(doc, path)
+      tokens = parse_pointer(path)
+      return nil if tokens.empty?
+
+      parent = tokens[0..-2].reduce(doc) do |obj, token|
+        case obj
+        when Hash
+          return nil unless obj.key?(token)
+
+          obj[token]
+        when Array
+          return nil unless token.match?(/\A\d+\z/)
+
+          idx = token.to_i
+          return nil if idx >= obj.length
+
+          obj[idx]
+        else
+          return nil
+        end
+      end
+
+      last = tokens.last
+      case parent
+      when Hash
+        return nil unless parent.key?(last)
+
+        parent.delete(last)
+      when Array
+        return nil unless last.match?(/\A\d+\z/)
+
+        idx = last.to_i
+        return nil if idx >= parent.length
+
+        parent.delete_at(idx)
+      end
+    end
+
     def self.parse_pointer(path)
       return [] if path == ''
       raise Error, "Invalid JSON Pointer: '#{path}'" unless path.start_with?('/')

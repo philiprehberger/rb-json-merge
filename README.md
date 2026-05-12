@@ -154,6 +154,7 @@ Philiprehberger::JsonMerge.write(items, "/list/-", "b")
 | `JsonMerge.paths(ops)` | List sorted, deduplicated paths a patch touches (includes `from` for move/copy) |
 | `JsonMerge.read(doc, path, default:)` | Read a value via RFC 6901 JSON Pointer; returns `default` when missing |
 | `JsonMerge.write(doc, path, value)` | Write a value at an RFC 6901 JSON Pointer; creates intermediate hashes as needed |
+| `JsonMerge.delete(doc, path)` | Remove the value at an RFC 6901 JSON Pointer; returns the removed value or nil when missing |
 
 ## Development
 
